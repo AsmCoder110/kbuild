@@ -25,6 +25,7 @@ if [ -d build ]; then
 		tar -xvf $lTAR >/dev/null
 		chown -R $USER:$USER $lDIR
 
+		cp ../0001-Revert-PCI-Add-a-REBAR-size-quirk-for-Sapphire-RX-56.patch $lDIR/
 		cd $lDIR
 
 		# Build it
@@ -38,7 +39,7 @@ if [ -d build ]; then
 		sudo make modules_install
 
 		sudo cp -v arch/x86/boot/bzImage /boot/vmlinuz-asmcoder
-		sudo mkinitcpio -p linux514asmcoder.preset
+		sudo mkinitcpio -p linux514asmcoder
 
 		sudo grub-mkconfig -o /boot/grub/grub.cfg
 
