@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 if [ -d build ]; then
-	rm -rfi build/* && \
+	rm -rf build/* && \
 		cd build && \
 		wget "https://kernel.org/"
 
@@ -25,23 +25,24 @@ if [ -d build ]; then
 		tar -xvf $lTAR >/dev/null
 		chown -R $USER:$USER $lDIR
 
+		# Make sure to put the patch in the directory this script was ran from.
 		cp ../0001-Revert-PCI-Add-a-REBAR-size-quirk-for-Sapphire-RX-56.patch $lDIR/
+		cp ../build_no_delete_no_check.sh $lDIR/
+		mv $lDIR/build_no_delete_no_check.sh $lDIR/b.sh
 		cd $lDIR
 
 		# Build it
 		make mrproper
+
+		# Using the configuration of the kernel already in use.
 		zcat /proc/config.gz > .config
 		sed -i 's/\-mtune=generic/\-march=native/g' arch/x86/Makefile
 		patch -p1 < 0001-Revert-PCI-Add-a-REBAR-size-quirk-for-Sapphire-RX-56.patch
 
-		make -j12
-		make -j12 modules
-		sudo make modules_install
-
-		sudo cp -v arch/x86/boot/bzImage /boot/vmlinuz-asmcoder
-		sudo mkinitcpio -p linux514asmcoder
-
-		sudo grub-mkconfig -o /boot/grub/grub.cfg
+		[[ -f ".config" ]]; make -j12 && make -j12 modules && sudo make modules_install \
+		&& sudo cp -v arch/x86/boot/bzImage /boot/vmlinuz-asmcoder \
+		&& sudo mkinitcpio -p linux514asmcoder \
+		&& sudo grub-mkconfig -o /boot/grub/grub.cfg
 
 else
 	exit;
