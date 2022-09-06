@@ -40,7 +40,7 @@ if [ -d build ]; then
 		patch -p1 < 0001-Revert-PCI-Add-a-REBAR-size-quirk-for-Sapphire-RX-56.patch
 
 		[[ -f ".config" ]]; make -j12 && make -j12 modules && sudo make modules_install \
-		&& sudo cp -v arch/x86/boot/bzImage /boot/vmlinuz-asmcoder \
+		&& mkdir ../previous_kernel && cp -v /boot/vmlinuz-asmcoder /boot/initramfs-asmcoder.img ../previous_kernel/ && sudo cp -v arch/x86/boot/bzImage /boot/vmlinuz-asmcoder \
 		&& sudo mkinitcpio -p linux514asmcoder \
 		&& sudo grub-mkconfig -o /boot/grub/grub.cfg
 
