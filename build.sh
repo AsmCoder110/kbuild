@@ -29,8 +29,7 @@ if [ -d build ]; then
 
 		# Make sure to put the patch in the directory this script was ran from.
 		cp ../0001-Revert-PCI-Add-a-REBAR-size-quirk-for-Sapphire-RX-56.patch $lDIR/
-		cp ../build_no_delete_no_check.sh $lDIR/
-		mv $lDIR/build_no_delete_no_check.sh $lDIR/b.sh
+		cp ../b.sh $lDIR/
 		cd $lDIR
 
 		# Build it
@@ -41,7 +40,7 @@ if [ -d build ]; then
 		sed -i 's/\-mtune=generic/\-march=native/g' arch/x86/Makefile
 		patch -p1 < 0001-Revert-PCI-Add-a-REBAR-size-quirk-for-Sapphire-RX-56.patch
 
-		[[ -f ".config" ]]; make -j12 && make -j12 modules && sudo make modules_install \
+		[[ -f ".config" ]] &&  make -j12 && make -j12 modules && sudo make modules_install \
 		&& mkdir ../previous_kernel && cp -v /boot/vmlinuz-asmcoder /boot/initramfs-asmcoder.img ../previous_kernel/ && sudo cp -v arch/x86/boot/bzImage /boot/vmlinuz-asmcoder \
 		&& sudo mkinitcpio -p linux514asmcoder \
 		&& sudo grub-mkconfig -o /boot/grub/grub.cfg
