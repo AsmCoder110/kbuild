@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+cd /home/asmcoder/Code/kbuild
+
 if [ -d build ]; then
 	rm -rf build/* && \
 		cd build && \
@@ -10,6 +12,8 @@ if [ -d build ]; then
 		lTAR=$(echo $kURL | cut -d\/ -f8 | sed 's/.xz//g') 		# Kernel archive name without the suffix .xz
 		lDIR=$(echo $lTAR | sed 's/.tar//g')
 
+		echo "Kernel URL: $kURL\n"
+		echo "$ksURL\n"
 		# Download Kernel
 		wget -c $kURL
 		wget -c $ksURL
