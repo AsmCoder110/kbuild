@@ -8,13 +8,13 @@ if [ -d build ]; then
 		wget "https://kernel.org/"
 
 		kURL=$(grep -E "cdn" -m 1 index.html | cut -d\" -f2)  	# Stable kernel URL
-		ksURL=$(echo $kURL | sed 's/xz/sign/g')					# PGP signature URL
-		lTAR=$(echo $kURL | cut -d\/ -f8 | sed 's/.xz//g') 		# Kernel archive name without the suffix .xz
-		lDIR=$(echo $lTAR | sed 's/.tar//g')
+        ksURL=${kURL//xz/sign}
+		lTAR=$(echo "$kURL" | cut -d/ -f8 | sed 's/.xz//g') 		# Kernel archive name without the suffix .xz
+        lDIR=${lTAR//.tar/}
 
 		# Download Kernel
-		wget --progress=bar -c $kURL
-		wget -c $ksURL
+		curl -C - -O "$kURL"
+		curl -C - -O "$ksURL"
 
 		# Unxz it
 		unxz $lTAR.xz
@@ -37,7 +37,6 @@ if [ -d build ]; then
 
 		# Using the configuration of the kernel already in use.
 		zcat /proc/config.gz > .config
-		sed -i 's/\-mtune=generic/\-march=native/g' arch/x86/Makefile
 		patch -p1 < 0001-Revert-PCI-Add-a-REBAR-size-quirk-for-Sapphire-RX-56.patch
 
 		[[ -f ".config" ]] &&  make -j12 && make -j12 modules && sudo make modules_install \
