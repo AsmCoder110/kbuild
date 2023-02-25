@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 
-cd /home/asmcoder/Code/kbuild
+cd /home/asmcoder/Code/kbuild || exit
 
 if [ -d build ]; then
 	rm -rf build/* && \
 		cd build && \
-		wget "https://kernel.org/"
+		curl "https://kernel.org/" -o index.html
 
 		kURL=$(grep -E "cdn" -m 1 index.html | cut -d\" -f2)  	# Stable kernel URL
         ksURL=${kURL//xz/sign}
@@ -17,20 +17,21 @@ if [ -d build ]; then
 		curl -C - -O "$ksURL"
 
 		# Unxz it
-		unxz $lTAR.xz
+		unxz "$lTAR".xz
 
 		# Verify its correctness
-		gpg --homedir $XDG_DATA_HOME/gnupg --verify $lTAR.sign $lTAR 2>gpg.log
-		[[ -z "$(grep 'Good' gpg.log)" ]] && echo "Bad gpg signature" && exit
+		gpg --homedir "$XDG_DATA_HOME"/gnupg --verify "$lTAR".sign "$lTAR" 2>gpg.log
+        grep -q 'Good' gpg.log || (echo "Bad gpg signature" && exit)
 
 		# Untar it
-		tar -xvf $lTAR >/dev/null
-		chown -R $USER:$USER $lDIR
+		tar -xvf "$lTAR" >/dev/null
+		chown -R "$USER":"$USER" "$lDIR"
 
 		# Make sure to put the patch in the directory this script was ran from.
-		cp ../0001-Revert-PCI-Add-a-REBAR-size-quirk-for-Sapphire-RX-56.patch $lDIR/
-		cp ../b.sh $lDIR/
-		cd $lDIR
+		cp ../0001-Revert-PCI-Add-a-REBAR-size-quirk-for-Sapphire-RX-56.patch "$lDIR"/
+		cp ../b.sh "$lDIR"/
+        cp ../.config "$lDIR"/
+		cd "$lDIR" || exit
 
 		# Build it
 		make mrproper
@@ -43,7 +44,6 @@ if [ -d build ]; then
 		&& mkdir ../previous_kernel && cp -v /boot/vmlinuz-asmcoder /boot/initramfs-asmcoder.img ../previous_kernel/ && sudo cp -v arch/x86/boot/bzImage /boot/vmlinuz-asmcoder \
 		&& sudo mkinitcpio -p linux514asmcoder \
 		&& sudo grub-mkconfig -o /boot/grub/grub.cfg
-
 else
 	exit;
 fi
